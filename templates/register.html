@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - SecureCloud</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Config (Matching Landing Page) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        future: {
+                            dark: '#0f172a', // Slate 900
+                            darker: '#020617', // Slate 950
+                            card: 'rgba(255, 255, 255, 0.05)',
+                            border: 'rgba(255, 255, 255, 0.1)',
+                            cyan: '#22d3ee',
+                            purple: '#c084fc',
+                            slate: '#94a3b8'
+                        }
+                    },
+                    boxShadow: {
+                        'neon-glow': '0 0 20px -5px rgba(34, 211, 238, 0.6)',
+                        'glass': '0 8px 32px 0 rgba(255, 255, 255, 0.03)',
+                        'inner-glow': '0 0 15px rgba(34, 211, 238, 0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Animations */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-10px) translateX(5px); }
+            100% { transform: translateY(0px) translateX(0px); }
+        }
+
+        @keyframes orbit {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .animate-rotate {
+            animation: rotate 4s linear infinite;
+        }
+        .animate-pulse {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .animate-orbit {
+            animation: orbit 10s linear infinite;
+        }
+        .delay-100 { animation-delay: 1s; }
+        .delay-200 { animation-delay: 2s; }
+        .delay-300 { animation-delay: 3s; }
+        .delay-400 { animation-delay: 4s; }
+    </style>
+</head>
+<body class="bg-future-dark text-slate-100 font-sans antialiased overflow-x-hidden">
+    
+    <!-- Background Grid Pattern -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'none\\' stroke=\\'%2338bdf\\' stroke-opacity=\\'0.1\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h2v4h2v4h2v4h2v4h2v4h2v4h2v4h2v4h2v4h2v4h2z\\'/%3E%3C/g%3E%3C/svg%3E')]" opacity="5"></div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center p-4 sm:p-8 relative z-10">
+        
+        <!-- Main Container -->
+        <div class="max-w-7xl mx-auto w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-future-card border-future-border rounded-3xl shadow-2xl overflow-hidden relative">
+                
+                <!-- Decorative Glow -->
+                <div class="absolute top-[-50%] right-[-20%] w-[300px] h-[300px] bg-cyan-500 rounded-full blur-[100px] opacity-20 animate-pulse"></div>
+
+                <!-- Left: Register Form -->
+                <div class="w-full p-8 md:p-12 relative z-10">
+                    <div class="mb-8 text-center md:text-left">
+                        <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">Join the Future</h1>
+                        <p class="text-slate-400 text-lg">Create your secure account.</p>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="mb-6 space-y-2">
+                                {% for category, message in messages %}
+                                <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-3 text-red-400"></i>
+                                    <span class="text-red-200 text-sm">{{ message }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Form -->
+                    <form method="POST" action="{{ url_for('register') }}" class="space-y-5">
+                        
+                        <!-- Username -->
+                        <div>
+                            <label class="block text-slate-300 text-sm font-medium mb-2">Username</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 pointer-events-none flex items-center">
+                                    <i class="fas fa-user text-future-border text-lg"></i>
+                                </div>
+                                <input type="text" name="username" required
+                                    class="w-full bg-slate-800/50 border border-future-border text-white rounded-xl py-4 pl-10 focus:outline-none focus:ring-2 focus:ring-future-cyan focus:border-future-cyan focus:bg-slate-900 transition-all duration-300 shadow-inner-glow placeholder-slate-500">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-slate-300 text-sm font-medium mb-2">Email Address</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 pointer-events-none flex items-center">
+                                    <i class="fas fa-envelope text-future-border text-lg"></i>
+                                </div>
+                                <input type="email" name="email" required
+                                    class="w-full bg-slate-800/50 border border-future-border text-white rounded-xl py-4 pl-10 focus:outline-none focus:ring-2 focus:ring-future-cyan focus:border-future-cyan focus:bg-slate-900 transition-all duration-300 shadow-inner-glow placeholder-slate-500">
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label class="block text-slate-300 text-sm font-medium mb-2">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 pointer-events-none flex items-center">
+                                    <i class="fas fa-lock text-future-border text-lg"></i>
+                                </div>
+                                <input type="password" name="password" required
+                                    class="w-full bg-slate-800/50 border border-future-border text-white rounded-xl py-4 pl-10 focus:outline-none focus:ring-2 focus:ring-future-cyan focus:border-future-cyan focus:bg-slate-900 transition-all duration-300 shadow-inner-glow placeholder-slate-500">
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div>
+                            <label class="block text-slate-300 text-sm font-medium mb-2">Confirm Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 pointer-events-none flex items-center">
+                                    <i class="fas fa-shield-alt text-future-border text-lg"></i>
+                                </div>
+                                <input type="password" name="confirm_password" required
+                                    class="w-full bg-slate-800/50 border border-future-border text-white rounded-xl py-4 pl-10 focus:outline-none focus:ring-2 focus:ring-future-cyan focus:border-future-cyan focus:bg-slate-900 transition-all duration-300 shadow-inner-glow placeholder-slate-500">
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="terms" class="w-4 h-4 text-future-cyan rounded border-future-border bg-transparent focus:ring-2 focus:ring-future-cyan cursor-pointer">
+                            <label for="terms" class="text-sm text-slate-400 ml-2">I agree to the <span class="text-future-cyan hover:underline cursor-pointer">Terms of Service</span></label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-future-cyan to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-4 rounded-xl shadow-neon-glow transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center group relative overflow-hidden">
+                            <span class="relative z-10 flex items-center">
+                                <i class="fas fa-user-plus mr-2 group-hover:animate-float"></i>
+                                Create Account
+                            </span>
+                            <div class="absolute inset-0 w-full h-full bg-white/20 transform -skew-x-12 -translate-x-full hover:translate-x-0 transition-transform duration-500"></div>
+                        </button>
+                    </form>
+
+                    <p class="mt-6 text-center text-slate-500 text-sm">
+                        Already have an account? <a href="{{ url_for('login') }}" class="text-future-cyan hover:text-cyan-300 font-medium ml-1 hover:underline transition-all">Sign In</a>
+                    </p>
+                </div>
+
+                <!-- Right: High-Tech Visuals (Encryption Core) -->
+                <div class="hidden md:flex items-center justify-center w-full relative h-[600px] bg-future-darker">
+                    
+                    <!-- Background Grid -->
+                    <div class="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.05)_1,transparent_1),linear-gradient(transparent_1,rgba(34,211,238,0.05)_1)] bg-[length:100%_4_100%]"></div>
+                    
+                    <!-- Rotating Rings (Encryption Layers) -->
+                    <div class="absolute inset-0 flex items-center justify-center animate-rotate">
+                        <!-- Outer Ring -->
+                        <div class="w-64 h-64 rounded-full border border-future-border/30 animate-orbit"></div>
+                        <!-- Middle Ring -->
+                        <div class="w-48 h-48 rounded-full border border-future-purple/40 animate-orbit delay-100" style="animation-duration: 8s;"></div>
+                        <!-- Inner Ring -->
+                        <div class="w-32 h-32 rounded-full border border-future-cyan/60 animate-orbit delay-200" style="animation-duration: 6s;"></div>
+                        
+                        <!-- Core (Glowing Shield) -->
+                        <div class="absolute inset-0 flex items-center justify-center animate-pulse">
+                            <div class="relative">
+                                <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center shadow-[0_0_60px_-15px_rgba(34,211,238,0.8)] z-10 relative">
+                                    <!-- Shield Icon -->
+                                    <i class="fas fa-shield-alt text-3xl text-future-cyan animate-pulse" style="animation-duration: 3s;"></i>
+                                    <!-- Status Dot -->
+                                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-green-400 animate-pulse"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Particles (Data Flow) -->
+                    <!-- Particle 1: Top Left -->
+                    <div class="absolute top-[20%] left-[20%] w-2 h-2 bg-future-cyan rounded-full shadow-neon-glow animate-float delay-100"></div>
+                    <!-- Particle 2: Bottom Right -->
+                    <div class="absolute bottom-[20%] right-[20%] w-3 h-3 bg-future-purple rounded-full shadow-neon-glow animate-float delay-300"></div>
+                    <!-- Particle 3: Top Right -->
+                    <div class="absolute top-[30%] right-[30%] w-2 h-2 bg-white rounded-full animate-float opacity-50 delay-200"></div>
+                    <!-- Particle 4: Bottom Left -->
+                    <div class="absolute bottom-[30%] left-[30%] w-2 h-2 bg-white rounded-full animate-float opacity-50 delay-400"></div>
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

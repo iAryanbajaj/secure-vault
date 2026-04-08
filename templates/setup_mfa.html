@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mfa-wrapper">
+    <div class="mfa-card">
+        
+        <!-- Header -->
+        <div class="mfa-header">
+            <div class="icon-badge">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2>Setup Multi-Factor Authentication</h2>
+            <p class="subtitle">Secure your account by scanning the QR code below.</p>
+        </div>
+
+        <!-- Professional Stepper -->
+        <div class="stepper-container">
+            <div class="step active">
+                <span class="step-dot"></span>
+                <span class="step-label">Install App</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <span class="step-dot"></span>
+                <span class="step-label">Scan QR</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <span class="step-dot"></span>
+                <span class="step-label">Verify</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="mfa-body">
+            
+            <!-- QR Code Section (Using your logic) -->
+            <div class="qr-container">
+                <div class="qr-box">
+                    <!-- Aapka original URL Logic -->
+                    <img src="{{ url_for('qr_code') }}?t={{ range(1, 10000)|random }}" 
+                         alt="MFA QR Code" 
+                         id="qr-code-image"
+                         class="qr-img">
+                    
+                    <!-- Error Handling (Your Logic) -->
+                    <div id="qr-error" class="error-message" style="display:none;">
+                        QR code failed to load. 
+                        <a href="javascript:window.location.reload()" class="link">Refresh</a>
+                    </div>
+                </div>
+
+                <button class="btn-manual" onclick="toggleSecret()">
+                    Can't scan? Enter code manually
+                </button>
+                
+                <!-- Secret Key (Your Logic) -->
+                <div id="manual-secret" class="secret-box" style="display:none;">
+                    <p class="small-label">Enter this key in your app:</p>
+                    <code class="secret-text">{{ session['mfa_setup_uri'].split('secret=')[1].split('&')[0] }}</code>
+                </div>
+            </div>
+
+            <!-- Verification Form (Using your logic) -->
+            <form method="POST" action="{{ url_for('setup_mfa') }}" id="mfa-form">
+                <div class="form-group">
+                    <label for="totp_code" class="form-label">Enter 6-digit verification code</label>
+                    <input type="text" 
+                           name="totp_code" 
+                           id="totp_code"
+                           class="input-otp" 
+                           placeholder="000000" 
+                           required
+                           pattern="\d{6}"
+                           maxlength="6"
+                           inputmode="numeric"
+                           autocomplete="one-time-code">
+                </div>
+
+                <button type="submit" class="btn-primary" id="verify-btn">
+                    <span id="button-text">Verify & Enable</span>
+                    <span class="spinner" id="spinner" style="display:none;"></span>
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Professional CSS -->
+<style>
+    /* Import Inter Font for Professional Look */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+        --primary: #3b82f6; /* Modern Blue */
+        --primary-hover: #2563eb;
+        --text-main: #111827;
+        --text-muted: #6b7280;
+        --bg-body: #f3f4f6;
+        --bg-card: #ffffff;
+        --border: #e5e7eb;
+        --input-bg: #f9fafb;
+        --radius: 12px;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+    }
+
+    .mfa-wrapper {
+        width: 100%;
+        max-width: 480px;
+        padding: 20px;
+    }
+
+    .mfa-card {
+        background: var(--bg-card);
+        border-radius: var(--radius);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .mfa-header {
+        text-align: center;
+        padding: 32px 32px 20px 32px;
+    }
+
+    .icon-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: #eff6ff;
+        color: var(--primary);
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        color: var(--text-main);
+    }
+
+    .subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* Minimal Stepper */
+    .stepper-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 32px;
+        margin-bottom: 32px;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-muted);
+        gap: 4px;
+    }
+
+    .step.active .step-dot {
+        background: var(--primary);
+    }
+
+    .step.active .step-label {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .step-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+        transition: all 0.3s;
+    }
+
+    .step.active .step-dot {
+        width: 8px; /* Keep dot same size but active color */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .step-line {
+        flex: 1;
+        height: 2px;
+        background: #e5e7eb;
+        margin: 0 8px 6px 8px;
+    }
+
+    /* QR Section */
+    .mfa-body {
+        padding: 0 32px 32px 32px;
+    }
+
+    .qr-container {
+        text-align: center;
+        background: #f8fafc;
+        padding: 24px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .qr-box {
+        width: 160px;
+        height: 160px;
+        margin: 0 auto 16px auto;
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .qr-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    .error-message {
+        font-size: 12px;
+        color: #ef4444;
+        background: #fef2f2;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #fecaca;
+    }
+
+    .btn-manual {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+
+    .btn-manual:hover {
+        background: #eff6ff;
+    }
+
+    .secret-box {
+        margin-top: 12px;
+        background: white;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+    }
+
+    .small-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin: 0 0 4px 0;
+    }
+
+    .secret-text {
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 14px;
+        color: var(--text-main);
+        display: block;
+    }
+
+    /* Form Elements */
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--text-main);
+    }
+
+    .input-otp {
+        width: 100%;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: 600;
+        text-align: center;
+        letter-spacing: 0.25em;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        background: var(--input-bg);
+        color: var(--text-main);
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .input-otp:focus {
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-hover);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+</style>
+
+<script>
+    // Logic to toggle Secret Key
+    function toggleSecret() {
+        const secretDiv = document.getElementById('manual-secret');
+        const btn = document.querySelector('.btn-manual');
+        
+        if (secretDiv.style.display === 'block') {
+            secretDiv.style.display = 'none';
+            btn.textContent = "Can't scan? Enter code manually";
+        } else {
+            secretDiv.style.display = 'block';
+            btn.textContent = "Hide code";
+        }
+    }
+
+    // Error handling for QR Image (Your Logic)
+    document.getElementById('qr-code-image').onerror = function() {
+        this.style.display = 'none';
+        document.getElementById('qr-error').style.display = 'block';
+    };
+
+    // Form Submit Logic (Your Logic)
+    document.getElementById('mfa-form').addEventListener('submit', function(e) {
+        // Note: If you are using standard form submission, this JS is just for UI feedback.
+        // If you are using AJAX, you would prevent default here.
+        // Based on your code, it looks like standard POST.
+        
+        const btn = document.getElementById('verify-btn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('button-text');
+        
+        // UI Feedback only
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        btnText.textContent = 'Verifying...';
+    });
+
+    // Input Formatting (Allow only numbers)
+    document.getElementById('totp_code').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+        
+        // Update step 3 visually
+        const step3 = document.querySelectorAll('.step')[2];
+        if(this.value.length > 0) {
+            step3.classList.add('active');
+        } else {
+            step3.classList.remove('active');
+        }
+    });
+</script>
+
+{% endblock %}
